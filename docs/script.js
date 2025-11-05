@@ -138,3 +138,11 @@ window.loadOrders = async function() {
     });
   }
 };
+
+
+const PRICE_MAP = {
+  "T恤": 99,
+  "帆布袋": 49,
+  "贴纸包": 25,
+  "马克杯": 79
+};
