@@ -24,6 +24,14 @@
     <div id="productList" class="product-list">
       <!-- 商品行由 script.js 动态生成 -->
     </div>
+        <!-- 隐私与免责声明（下单前必须同意） -->
+    <div style="margin-top:12px;font-size:13px;color:#333;">
+      <label style="display:flex;align-items:center;gap:8px;">
+        <input id="agreePrivacy" type="checkbox" style="width:16px;height:16px;">
+        <span>我已阅读并同意 <a href="privacy.html" target="_blank">隐私说明与购买免责声明</a>（提交订单即视为同意）</span>
+      </label>
+    </div>
+
 
     <button onclick="goToConfirm()">下一步：确认订单</button>
 
