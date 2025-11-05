@@ -1,45 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <title>小店下单系统</title>
+  <meta charset="UTF-8">
+  <title>登录 / 注册</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>🛒 小店下单系统</h2>
-
-  <div>
-    <label>名字：</label>
-    <input id="name" />
-    <label>QQ：</label>
-    <input id="qq" />
-    <button onclick="saveUser()">登录 / 保存</button>
-  </div>
-
-  <hr>
-
-  <div>
-    <h3>下单</h3>
-    <label>商品：</label>
-    <select id="product">
-      <option value="T恤">T恤</option>
-      <option value="帆布袋">帆布袋</option>
-      <option value="马克杯">马克杯</option>
-      <option value="贴纸包">贴纸包</option>
-    </select>
-    <label>数量：</label>
-    <input id="quantity" type="number" value="1" min="1" />
-    <button onclick="placeOrder()">提交订单</button>
-  </div>
-
-  <hr>
-
-  <div>
-    <h3>我的订单</h3>
-    <button onclick="loadOrders()">刷新</button>
-    <ul id="ordersList"></ul>
+  <div class="container">
+    <h2>🧾 小店登录 / 注册</h2>
+    <input id="name" placeholder="请输入名字">
+    <input id="qq" placeholder="请输入QQ号">
+    <button onclick="loginOrRegister()">登录 / 注册</button>
   </div>
 
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
