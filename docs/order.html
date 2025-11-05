@@ -12,17 +12,24 @@
     <p id="userInfo"></p>
     <button onclick="logout()">退出登录</button>
 
-    <label>商品：</label>
-    <select id="product">
-      <option value="T恤">T恤</option>
-      <option value="帆布袋">帆布袋</option>
-      <option value="贴纸包">贴纸包</option>
-      <option value="马克杯">马克杯</option>
-    </select>
-    <label>数量：</label>
-    <input id="quantity" type="number" value="1" min="1">
+    <h3>收货信息</h3>
+    <label>收件人：</label>
+    <input id="recipient" placeholder="收件人姓名">
+    <label>联系方式：</label>
+    <input id="phone" placeholder="手机号 / 微信 / QQ等">
     <label>地址：</label>
     <input id="address" placeholder="填写详细收货地址">
+
+    <h3>商品及数量（不想买的填 0）</h3>
+    <label>T恤 数量：</label>
+    <input id="qty_tshirt" type="number" value="0" min="0">
+    <label>帆布袋 数量：</label>
+    <input id="qty_bag" type="number" value="0" min="0">
+    <label>贴纸包 数量：</label>
+    <input id="qty_sticker" type="number" value="0" min="0">
+    <label>马克杯 数量：</label>
+    <input id="qty_cup" type="number" value="0" min="0">
+
     <button onclick="placeOrder()">提交订单</button>
 
     <p><a href="myorders.html">查看我的订单 →</a></p>
@@ -31,4 +38,5 @@
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
