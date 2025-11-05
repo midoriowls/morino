@@ -481,19 +481,16 @@ window.loadOrders = async function () {
     return;
   }
 
-  data.forEach(o => {
+  data.forEach((o) => {
     const payStatus = o.payment_status || "未支付";
     const payMethod = o.pay_method ? `（${o.pay_method}）` : "";
     const orderNo = o.order_group || o.id;
-    const amount = o.total_amount != null ? Number(o.total_amount) : null;
-  
-    const displayTime = o.time
-      ? new Date(o.time).toLocaleString("zh-CN", {
-          timeZone: "Asia/Shanghai",
-          hour12: false
-        })
-      : "";
-  
+    const amount =
+      o.total_amount != null ? Number(o.total_amount) : null;
+
+    // ❗这里不再 new Date，不再转时区，直接用数据库里的字符串
+    const displayTime = o.time || "";
+
     list.innerHTML += `
       <li>
         订单编号：${orderNo}<br>
@@ -507,8 +504,8 @@ window.loadOrders = async function () {
         <a href="success.html?og=${encodeURIComponent(orderNo)}">查看明细</a>
       </li><hr>`;
   });
-
 };
+
 
 // ========== 根据当前页面自动加载需要的数据 ==========
 
