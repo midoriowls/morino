@@ -7,13 +7,6 @@ const supabaseUrl = "https://gtseeznprlqpbklkfgup.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0c2Vlem5wcmxxcGJrbGtmZ3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNDcwNDAsImV4cCI6MjA3NzkyMzA0MH0.cPPS2UNhRtyJ0CMA7xdzqSd0ZVBwdncVFb0Ho0foJfU";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-// ======= 填入你自己的 Supabase 项目信息 =======
-const supabaseUrl = "https://YOUR_PROJECT_ID.supabase.co";
-const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 // 商品价格表（自行修改）
 const PRICE_MAP = {
   "T恤": 99,
@@ -116,6 +109,9 @@ window.placeOrder = async function() {
   // 生成本次下单的订单编号（order_group）
   const orderGroup = "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
 
+  const name = localStorage.getItem("name");
+  const qq   = localStorage.getItem("qq");
+
   const now = new Date().toISOString();
   const rows = items.map(it => ({
     user_id:  userId,
@@ -139,7 +135,6 @@ window.placeOrder = async function() {
   if (error) {
     alert("下单失败：" + error.message);
   } else {
-    // 下单成功后跳转到成功页，带上订单编号
     window.location.href = "success.html?og=" + encodeURIComponent(orderGroup);
   }
 };
