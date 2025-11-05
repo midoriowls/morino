@@ -10,17 +10,24 @@
   <div>
     <label>名字：</label>
     <input id="name" />
-    <label>ID：</label>
-    <input id="userId" />
-    <button onclick="saveUser()">保存</button>
+    <label>QQ：</label>
+    <input id="qq" />
+    <button onclick="saveUser()">登录 / 保存</button>
   </div>
 
   <hr>
 
   <div>
     <h3>下单</h3>
-    <input id="orderName" placeholder="商品名" />
-    <input id="quantity" type="number" placeholder="数量" value="1" min="1" />
+    <label>商品：</label>
+    <select id="product">
+      <option value="T恤">T恤</option>
+      <option value="帆布袋">帆布袋</option>
+      <option value="马克杯">马克杯</option>
+      <option value="贴纸包">贴纸包</option>
+    </select>
+    <label>数量：</label>
+    <input id="quantity" type="number" value="1" min="1" />
     <button onclick="placeOrder()">提交订单</button>
   </div>
 
@@ -35,3 +42,4 @@
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
