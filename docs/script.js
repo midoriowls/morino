@@ -13,7 +13,6 @@ window.loginOrRegister = async function() {
   const qq = document.getElementById("qq").value.trim();
   if (!name || !qq) return alert("请输入名字和QQ号！");
 
-  // 查询是否存在
   const { data: existing } = await supabase
     .from("users")
     .select("*")
@@ -39,6 +38,24 @@ window.loginOrRegister = async function() {
   localStorage.setItem("qq", qq);
 
   window.location.href = "order.html";
+};
+
+// 显示用户信息（在页面加载时调用）
+function displayUserInfo() {
+  const name = localStorage.getItem("name");
+  const qq = localStorage.getItem("qq");
+  const el = document.getElementById("userInfo");
+  if (el && name && qq) {
+    el.textContent = `当前用户：${name}（QQ: ${qq}）`;
+  }
+}
+displayUserInfo();
+
+// 退出登录
+window.logout = function() {
+  localStorage.clear();
+  alert("已退出登录");
+  window.location.href = "index.html";
 };
 
 // 下单
