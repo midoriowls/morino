@@ -6,12 +6,12 @@ body {
 }
 
 .container {
-  max-width: 400px;
+  max-width: 420px;
   background: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin: 60px auto;
+  margin: 40px auto;
 }
 
 input, select, button {
@@ -20,6 +20,7 @@ input, select, button {
   margin-top: 10px;
   padding: 10px;
   font-size: 15px;
+  box-sizing: border-box;
 }
 
 button {
@@ -28,9 +29,21 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-top: 15px;
 }
 button:hover {
   background: #45a049;
 }
 a { color: #007BFF; text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .container {
+    margin: 20px;
+    padding: 15px;
+  }
+  input, select, button {
+    font-size: 16px;
+  }
+}
+
