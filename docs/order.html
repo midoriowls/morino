@@ -21,14 +21,9 @@
     <input id="address" placeholder="填写详细收货地址">
 
     <h3>商品及数量（不想买的填 0）</h3>
-    <label>T恤 数量：</label>
-    <input id="qty_tshirt" type="number" value="0" min="0">
-    <label>帆布袋 数量：</label>
-    <input id="qty_bag" type="number" value="0" min="0">
-    <label>贴纸包 数量：</label>
-    <input id="qty_sticker" type="number" value="0" min="0">
-    <label>马克杯 数量：</label>
-    <input id="qty_cup" type="number" value="0" min="0">
+    <div id="productList" class="product-list">
+      <!-- 商品行由 script.js 动态生成 -->
+    </div>
 
     <button onclick="placeOrder()">提交订单</button>
 
