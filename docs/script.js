@@ -168,16 +168,26 @@ window.loadOrderSummary = async function() {
   }
 
   let total = 0;
+  let detailsHtml = "<h3>订单明细</h3><ul>";
+
   data.forEach(o => {
     const price = PRICE_MAP[o.product] || 0;
-    total += price * o.quantity;
+    const subtotal = price * o.quantity;
+    total += subtotal;
+    detailsHtml += `<li>${o.product} × ${o.quantity} 个，单价 ￥${price}，小计 ￥${subtotal}</li>`;
   });
+
+  detailsHtml += "</ul>";
 
   const totalEl = document.getElementById("totalAmount");
   const ogEl = document.getElementById("orderGroup");
+  const detailsEl = document.getElementById("orderDetails");
+
   if (totalEl) totalEl.textContent = total.toString();
   if (ogEl) ogEl.textContent = og;
+  if (detailsEl) detailsEl.innerHTML = detailsHtml;
 };
+
 
 // 成功页：确认支付（设置为等待确认支付）
 window.confirmPayment = async function() {
