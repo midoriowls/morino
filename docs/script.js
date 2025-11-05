@@ -217,6 +217,7 @@ window.confirmPayment = async function() {
     alert("提交支付信息失败：" + error.message);
   } else {
     alert("已提交支付信息，等待店主确认。");
+    window.location.href = "myorders.html";
   }
 };
 
