@@ -180,7 +180,11 @@ window.goToConfirm = function () {
   const recipient = recipientEl ? recipientEl.value.trim() : "";
   const phone = phoneEl ? phoneEl.value.trim() : "";
   const address = addressEl ? addressEl.value.trim() : "";
-
+  const agreeEl = document.getElementById("agreePrivacy");
+  if (!agreeEl || !agreeEl.checked) {
+    alert("请先勾选“我已阅读并同意隐私说明与购买免责声明”");
+    return;
+  }
   if (!recipient || !phone || !address) {
     alert("收件人、联系方式和地址必须全部填写！");
     return;
