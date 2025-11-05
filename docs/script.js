@@ -59,25 +59,54 @@ window.logout = function() {
 };
 
 // 下单
+// 下单（支持多个品类）
 window.placeOrder = async function() {
   const userId = localStorage.getItem("userId");
   if (!userId) return alert("请先登录！");
-  const product = document.getElementById("product").value;
-  const quantity = parseInt(document.getElementById("quantity").value || "1");
+
+  const recipient = document.getElementById("recipient").value.trim();
+  const phone = document.getElementById("phone").value.trim();
   const address = document.getElementById("address").value.trim();
 
-  const { error } = await supabase.from("orders").insert({
-    user_id: userId,
-    product,
-    quantity,
-    address,
-    status: "待发货",
-    tracking: "",
-    time: new Date().toISOString()
-  });
+  if (!recipient || !phone || !address) {
+    return alert("收件人、联系方式和地址必须全部填写！");
+  }
 
-  if (error) alert("下单失败：" + error.message);
-  else alert("下单成功！");
+  const qtyTshirt  = parseInt(document.getElementById("qty_tshirt").value || "0");
+  const qtyBag     = parseInt(document.getElementById("qty_bag").value || "0");
+  const qtySticker = parseInt(document.getElementById("qty_sticker").value || "0");
+  const qtyCup     = parseInt(document.getElementById("qty_cup").value || "0");
+
+  const items = [];
+  if (qtyTshirt  > 0) items.push({ product: "T恤",    quantity: qtyTshirt  });
+  if (qtyBag     > 0) items.push({ product: "帆布袋",  quantity: qtyBag     });
+  if (qtySticker > 0) items.push({ product: "贴纸包",  quantity: qtySticker });
+  if (qtyCup     > 0) items.push({ product: "马克杯",  quantity: qtyCup     });
+
+  if (items.length === 0) {
+    return alert("请至少选择一种商品（数量 > 0）");
+  }
+
+  const now = new Date().toISOString();
+  const rows = items.map(it => ({
+    user_id:  userId,
+    product:  it.product,
+    quantity: it.quantity,
+    recipient,
+    phone,
+    address,
+    status:   "待发货",
+    tracking: "",
+    time:     now
+  }));
+
+  const { error } = await supabase.from("orders").insert(rows);
+
+  if (error) {
+    alert("下单失败：" + error.message);
+  } else {
+    alert("下单成功！如果买了多个品类，会生成多条订单记录。");
+  }
 };
 
 // 加载订单
