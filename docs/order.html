@@ -2,12 +2,16 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>下单</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h2>🛒 填写订单</h2>
+    <p id="userInfo"></p>
+    <button onclick="logout()">退出登录</button>
+
     <label>商品：</label>
     <select id="product">
       <option value="T恤">T恤</option>
@@ -20,9 +24,11 @@
     <label>地址：</label>
     <input id="address" placeholder="填写详细收货地址">
     <button onclick="placeOrder()">提交订单</button>
+
     <p><a href="myorders.html">查看我的订单 →</a></p>
   </div>
 
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
