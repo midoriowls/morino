@@ -294,7 +294,8 @@ window.confirmOrder = async function () {
 
   const orderGroup =
     "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
-  const now = new Date().toISOString();
+  const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+
 
   // 1）插 orders 主表（一单一行，含总金额）
   const { data: orderRow, error: orderError } = await supabase
