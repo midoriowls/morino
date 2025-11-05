@@ -15,9 +15,9 @@ const PRODUCTS = [
   { id: "work4",     name: "寒姨", price: 99999, desc: "妈你快回来我要啃老" }
 ];
 
-// ========== 工具函数 ==========
+// ========== 通用小工具 ==========
 
-// 显示当前登录用户
+// 显示当前登录用户（下单页 / 订单页 / 确认页 / 支付页）
 function displayUserInfo() {
   const name = localStorage.getItem("name");
   const qq = localStorage.getItem("qq");
@@ -28,18 +28,34 @@ function displayUserInfo() {
 }
 displayUserInfo();
 
-// 从 URL 获取参数
+// URL 取参数
 function getQueryParam(key) {
   const params = new URLSearchParams(window.location.search);
   return params.get(key);
 }
 
-// 下单页：动态渲染商品列表
+// 待确认订单存取（localStorage）
+function setPendingOrder(data) {
+  localStorage.setItem("pendingOrder", JSON.stringify(data));
+}
+function getPendingOrder() {
+  const raw = localStorage.getItem("pendingOrder");
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+// ========== 下单页：渲染商品列表 ==========
+
 function renderProductList() {
   const container = document.getElementById("productList");
-  if (!container) return;
+  if (!container) return; // 不是下单页就不渲染
+
   container.innerHTML = "";
-  PRODUCTS.forEach(p => {
+  PRODUCTS.forEach((p) => {
     const row = document.createElement("div");
     row.className = "product-item";
     row.innerHTML = `
@@ -103,40 +119,35 @@ window.logout = function () {
   window.location.href = "index.html";
 };
 
-// ========== 下单（主表 + 明细表，商品来自 PRODUCTS） ==========
+// ========== 第一步：下单页 → 生成待确认订单，跳转确认页 ==========
 
-function setPendingOrder(data) {
-  localStorage.setItem("pendingOrder", JSON.stringify(data));
-}
-function getPendingOrder() {
-  const raw = localStorage.getItem("pendingOrder");
-  if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
-}
-
-// 第一步：在下单页收集数据 → 存到本地 → 跳到确认页
 window.goToConfirm = function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
     alert("请先登录！");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
-  const recipient = document.getElementById("recipient").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
+  const recipientEl = document.getElementById("recipient");
+  const phoneEl = document.getElementById("phone");
+  const addressEl = document.getElementById("address");
+  const recipient = recipientEl ? recipientEl.value.trim() : "";
+  const phone = phoneEl ? phoneEl.value.trim() : "";
+  const address = addressEl ? addressEl.value.trim() : "";
 
   if (!recipient || !phone || !address) {
-    return alert("收件人、联系方式和地址必须全部填写！");
+    alert("收件人、联系方式和地址必须全部填写！");
+    return;
   }
 
   const items = [];
   let totalAmount = 0;
 
-  PRODUCTS.forEach(p => {
+  PRODUCTS.forEach((p) => {
     const input = document.getElementById("qty_" + p.id);
     if (!input) return;
-    const qty = parseInt(input.value || "0");
+    const qty = parseInt(input.value || "0", 10);
     if (qty > 0) {
       const subtotal = p.price * qty;
       totalAmount += subtotal;
@@ -145,13 +156,14 @@ window.goToConfirm = function () {
         name: p.name,
         price: p.price,
         quantity: qty,
-        subtotal
+        subtotal,
       });
     }
   });
 
   if (items.length === 0) {
-    return alert("请至少选择一种商品（数量 > 0）");
+    alert("请至少选择一种商品（数量 > 0）");
+    return;
   }
 
   const pending = {
@@ -159,24 +171,28 @@ window.goToConfirm = function () {
     phone,
     address,
     items,
-    totalAmount
+    totalAmount,
   };
   setPendingOrder(pending);
 
   window.location.href = "confirm.html";
 };
-// 确认页：展示待确认订单
+
+// ========== 第二步：确认页展示待确认订单 ==========
+
 window.loadPendingOrder = function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
     alert("请先登录！");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
   const pending = getPendingOrder();
   if (!pending) {
     alert("没有找到待确认的订单，请重新填写。");
-    return (window.location.href = "order.html");
+    window.location.href = "order.html";
+    return;
   }
 
   const shipEl = document.getElementById("confirmShipping");
@@ -194,7 +210,7 @@ window.loadPendingOrder = function () {
 
   if (itemsEl) {
     let html = "<h3>商品明细</h3><ul>";
-    pending.items.forEach(it => {
+    pending.items.forEach((it) => {
       html += `<li>${it.name} × ${it.quantity} 个，单价 ￥${it.price}，小计 ￥${it.subtotal}</li>`;
     });
     html += "</ul>";
@@ -205,49 +221,27 @@ window.loadPendingOrder = function () {
     totalEl.textContent = pending.totalAmount.toString();
   }
 };
+
+// 返回修改
 window.backToEdit = function () {
   window.location.href = "order.html";
 };
-if (window.location.pathname.endsWith("confirm.html")) {
-  window.loadPendingOrder();
-}
-if (window.location.pathname.endsWith("success.html")) {
-  window.loadOrderSummary();
-}
 
+// ========== 第三步：确认下单 → 真正写入数据库 → 跳支付页 ==========
 
-  // 从所有商品输入中收集数量
-  const items = [];
-  PRODUCTS.forEach(p => {
-    const input = document.getElementById("qty_" + p.id);
-    if (!input) return;
-    const qty = parseInt(input.value || "0");
-    if (qty > 0) {
-      const subtotal = p.price * qty;
-      items.push({
-        product: p.name,
-        quantity: qty,
-        unit_price: p.price,
-        subtotal
-      });
-    }
-  });
-
-  if (items.length === 0) {
-    return alert("请至少选择一种商品（数量 > 0）");
-  }
-// 第二步：确认页点击“确认下单” → 真正写入数据库 → 跳到支付页
 window.confirmOrder = async function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
     alert("请先登录！");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
   const pending = getPendingOrder();
   if (!pending) {
     alert("没有找到待确认的订单，请重新填写。");
-    return (window.location.href = "order.html");
+    window.location.href = "order.html";
+    return;
   }
 
   const name = localStorage.getItem("name");
@@ -257,7 +251,7 @@ window.confirmOrder = async function () {
     "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
   const now = new Date().toISOString();
 
-  // 1）插 orders 主表
+  // 1）插 orders 主表（一单一行，含总金额）
   const { data: orderRow, error: orderError } = await supabase
     .from("orders")
     .insert({
@@ -272,25 +266,27 @@ window.confirmOrder = async function () {
       order_group: orderGroup,
       login_name: name,
       login_qq: qq,
+      main_product: pending.items.map(i => `${i.name}×${i.quantity}`).join("、"),
       total_amount: pending.totalAmount,
-      time: now
+      time: now,
     })
     .select()
     .single();
 
   if (orderError) {
-    return alert("下单失败：" + orderError.message);
+    alert("下单失败：" + orderError.message);
+    return;
   }
 
   const orderId = orderRow.id;
 
   // 2）插 order_items 明细
-  const itemRows = pending.items.map(it => ({
+  const itemRows = pending.items.map((it) => ({
     order_id: orderId,
     product: it.name,
     quantity: it.quantity,
     unit_price: it.price,
-    subtotal: it.subtotal
+    subtotal: it.subtotal,
   }));
 
   const { error: itemsError } = await supabase
@@ -299,89 +295,30 @@ window.confirmOrder = async function () {
 
   if (itemsError) {
     alert("主订单已创建，但明细保存失败：" + itemsError.message);
+    // 不 return，让订单继续进入支付流程
   }
 
-  // 清掉待确认订单，防止重复提交
+  // 清掉 pending，防止重复提交
   localStorage.removeItem("pendingOrder");
 
-  // 跳到支付页
-  window.location.href = "success.html?og=" + encodeURIComponent(orderGroup);
+  window.location.href =
+    "success.html?og=" + encodeURIComponent(orderGroup);
 };
 
-  // 计算总金额
-  let totalAmount = 0;
-  items.forEach(it => {
-    totalAmount += it.subtotal;
-  });
-
-  const name = localStorage.getItem("name");
-  const qq = localStorage.getItem("qq");
-
-  // 生成订单编号
-  const orderGroup =
-    "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
-  const now = new Date().toISOString();
-
-  // 1）插入主订单 orders（一单一行）
-  const { data: orderRow, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      user_id: userId,
-      recipient,
-      phone,
-      address,
-      status: "待发货",
-      tracking: "",
-      payment_status: "未支付",
-      pay_method: "",
-      order_group: orderGroup,
-      login_name: name,
-      login_qq: qq,
-      total_amount: totalAmount,
-      time: now
-    })
-    .select()
-    .single();
-
-  if (orderError) {
-    return alert("下单失败：" + orderError.message);
-  }
-
-  const orderId = orderRow.id;
-
-  // 2）插入明细 order_items（每个商品一行）
-  const itemRows = items.map(it => ({
-    order_id: orderId,
-    product: it.product,
-    quantity: it.quantity,
-    unit_price: it.unit_price,
-    subtotal: it.subtotal
-  }));
-
-  const { error: itemsError } = await supabase
-    .from("order_items")
-    .insert(itemRows);
-
-  if (itemsError) {
-    alert("下单主记录已创建，但明细保存失败：" + itemsError.message);
-  }
-
-  // 跳转到成功页
-  window.location.href = "success.html?og=" + encodeURIComponent(orderGroup);
-};
-
-// ========== 成功页：加载订单汇总 ==========
+// ========== 支付页：加载订单汇总 ==========
 
 window.loadOrderSummary = async function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
     alert("请先登录！");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
   const og = getQueryParam("og");
   if (!og) {
-    return alert("缺少订单编号参数！");
+    alert("缺少订单编号参数！");
+    return;
   }
 
   // 1）查主订单
@@ -393,7 +330,8 @@ window.loadOrderSummary = async function () {
     .single();
 
   if (orderErr) {
-    return alert("加载订单失败：" + orderErr.message);
+    alert("加载订单失败：" + orderErr.message);
+    return;
   }
 
   // 2）查明细
@@ -403,10 +341,10 @@ window.loadOrderSummary = async function () {
     .eq("order_id", order.id);
 
   if (itemsErr) {
-    return alert("加载订单明细失败：" + itemsErr.message);
+    alert("加载订单明细失败：" + itemsErr.message);
+    return;
   }
 
-  // 总金额：优先用 total_amount
   let total = Number(order.total_amount || 0);
   if (!total && items && items.length > 0) {
     total = items.reduce(
@@ -416,7 +354,7 @@ window.loadOrderSummary = async function () {
   }
 
   let detailsHtml = "<h3>订单明细</h3><ul>";
-  (items || []).forEach(it => {
+  (items || []).forEach((it) => {
     const unit = Number(it.unit_price || 0);
     const sub = Number(it.subtotal || 0);
     detailsHtml += `<li>${it.product} × ${it.quantity} 个，单价 ￥${unit}，小计 ￥${sub}</li>`;
@@ -432,26 +370,29 @@ window.loadOrderSummary = async function () {
   if (detailsEl) detailsEl.innerHTML = detailsHtml;
 };
 
-// 成功页：确认支付（设置为等待确认支付，并跳转订单列表）
+// 支付页：确认已付款（设置等待确认支付，跳我的订单）
 window.confirmPayment = async function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
     alert("请先登录！");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
   const og = getQueryParam("og");
   if (!og) {
-    return alert("缺少订单编号参数！");
+    alert("缺少订单编号参数！");
+    return;
   }
 
-  const payMethod = document.getElementById("payMethod").value;
+  const payMethodEl = document.getElementById("payMethod");
+  const payMethod = payMethodEl ? payMethodEl.value : "";
 
   const { error } = await supabase
     .from("orders")
     .update({
       payment_status: "等待确认支付",
-      pay_method: payMethod
+      pay_method: payMethod,
     })
     .eq("user_id", userId)
     .eq("order_group", og);
@@ -464,18 +405,14 @@ window.confirmPayment = async function () {
   }
 };
 
-// 如果当前页面是 success.html，自动加载汇总信息
-if (window.location.pathname.endsWith("success.html")) {
-  window.loadOrderSummary();
-}
-
-// ========== 我的订单：每行一单，含总金额 ==========
+// ========== 我的订单：每行一单 ==========
 
 window.loadOrders = async function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
     alert("请先登录！");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
   const { data, error } = await supabase
@@ -485,29 +422,49 @@ window.loadOrders = async function () {
     .order("time", { ascending: false });
 
   const list = document.getElementById("ordersList");
+  if (!list) return;
+
   list.innerHTML = "";
   if (error) {
     list.innerHTML = `<li>加载失败：${error.message}</li>`;
-  } else if (!data || data.length === 0) {
-    list.innerHTML = "<li>暂无订单</li>";
-  } else {
-    data.forEach(o => {
-      const payStatus = o.payment_status || "未支付";
-      const payMethod = o.pay_method ? `（${o.pay_method}）` : "";
-      const orderNo = o.order_group || o.id;
-      const amount = o.total_amount != null ? Number(o.total_amount) : null;
-      list.innerHTML += `
-        <li>
-          订单编号：${orderNo}<br>
-          金额：${amount !== null ? "￥" + amount : "—"}<br>
-          收件人：${o.recipient || ""} / 联系方式：${o.phone || ""}<br>
-          地址：${o.address || ""}<br>
-          发货状态：${o.status || ""}<br>
-          支付状态：${payStatus}${payMethod}<br>
-          ${o.tracking ? "快递单号：📦 " + o.tracking + "<br>" : ""}
-          <small>${o.time ? new Date(o.time).toLocaleString() : ""}</small><br>
-          <a href="success.html?og=${encodeURIComponent(orderNo)}">查看明细</a>
-        </li><hr>`;
-    });
+    return;
   }
+
+  if (!data || data.length === 0) {
+    list.innerHTML = "<li>暂无订单</li>";
+    return;
+  }
+
+  data.forEach((o) => {
+    const payStatus = o.payment_status || "未支付";
+    const payMethod = o.pay_method ? `（${o.pay_method}）` : "";
+    const orderNo = o.order_group || o.id;
+    const amount =
+      o.total_amount != null ? Number(o.total_amount) : null;
+    list.innerHTML += `
+      <li>
+        订单编号：${orderNo}<br>
+        金额：${amount !== null ? "￥" + amount : "—"}<br>
+        收件人：${o.recipient || ""} / 联系方式：${o.phone || ""}<br>
+        地址：${o.address || ""}<br>
+        发货状态：${o.status || ""}<br>
+        支付状态：${payStatus}${payMethod}<br>
+        ${o.tracking ? "快递单号：📦 " + o.tracking + "<br>" : ""}
+        <small>${o.time ? new Date(o.time).toLocaleString() : ""}</small><br>
+        <a href="success.html?og=${encodeURIComponent(orderNo)}">查看明细</a>
+      </li><hr>`;
+  });
 };
+
+// ========== 根据当前页面自动加载需要的数据 ==========
+
+const path = window.location.pathname;
+if (path.endsWith("confirm.html")) {
+  window.loadPendingOrder();
+}
+if (path.endsWith("success.html")) {
+  window.loadOrderSummary();
+}
+if (path.endsWith("myorders.html")) {
+  window.loadOrders();
+}
