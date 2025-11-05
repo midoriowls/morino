@@ -541,7 +541,7 @@ window.loadOrders = async function () {
         支付状态：${payStatus}${payMethod}<br>
         ${o.tracking ? "快递单号：📦 " + o.tracking + "<br>" : ""}
         <small>${displayTime}</small><br>
-        <a href="detail.html?og=${encodeURIComponent(orderNo)}">查看明细</a>
+      <a href="success.html?og=${encodeURIComponent(orderNo)}&view=1">查看明细</a>
       </li><hr>`;
   });
 };
