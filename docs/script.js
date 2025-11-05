@@ -105,9 +105,22 @@ window.logout = function () {
 
 // ========== 下单（主表 + 明细表，商品来自 PRODUCTS） ==========
 
-window.placeOrder = async function () {
+function setPendingOrder(data) {
+  localStorage.setItem("pendingOrder", JSON.stringify(data));
+}
+function getPendingOrder() {
+  const raw = localStorage.getItem("pendingOrder");
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+// 第一步：在下单页收集数据 → 存到本地 → 跳到确认页
+window.goToConfirm = function () {
   const userId = localStorage.getItem("userId");
-  if (!userId) return alert("请先登录！");
+  if (!userId) {
+    alert("请先登录！");
+    return (window.location.href = "index.html");
+  }
 
   const recipient = document.getElementById("recipient").value.trim();
   const phone = document.getElementById("phone").value.trim();
@@ -116,6 +129,92 @@ window.placeOrder = async function () {
   if (!recipient || !phone || !address) {
     return alert("收件人、联系方式和地址必须全部填写！");
   }
+
+  const items = [];
+  let totalAmount = 0;
+
+  PRODUCTS.forEach(p => {
+    const input = document.getElementById("qty_" + p.id);
+    if (!input) return;
+    const qty = parseInt(input.value || "0");
+    if (qty > 0) {
+      const subtotal = p.price * qty;
+      totalAmount += subtotal;
+      items.push({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: qty,
+        subtotal
+      });
+    }
+  });
+
+  if (items.length === 0) {
+    return alert("请至少选择一种商品（数量 > 0）");
+  }
+
+  const pending = {
+    recipient,
+    phone,
+    address,
+    items,
+    totalAmount
+  };
+  setPendingOrder(pending);
+
+  window.location.href = "confirm.html";
+};
+// 确认页：展示待确认订单
+window.loadPendingOrder = function () {
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    alert("请先登录！");
+    return (window.location.href = "index.html");
+  }
+
+  const pending = getPendingOrder();
+  if (!pending) {
+    alert("没有找到待确认的订单，请重新填写。");
+    return (window.location.href = "order.html");
+  }
+
+  const shipEl = document.getElementById("confirmShipping");
+  const itemsEl = document.getElementById("confirmItems");
+  const totalEl = document.getElementById("confirmTotal");
+
+  if (shipEl) {
+    shipEl.innerHTML = `
+      <h3>收货信息</h3>
+      <p>收件人：${pending.recipient}</p>
+      <p>联系方式：${pending.phone}</p>
+      <p>地址：${pending.address}</p>
+    `;
+  }
+
+  if (itemsEl) {
+    let html = "<h3>商品明细</h3><ul>";
+    pending.items.forEach(it => {
+      html += `<li>${it.name} × ${it.quantity} 个，单价 ￥${it.price}，小计 ￥${it.subtotal}</li>`;
+    });
+    html += "</ul>";
+    itemsEl.innerHTML = html;
+  }
+
+  if (totalEl) {
+    totalEl.textContent = pending.totalAmount.toString();
+  }
+};
+window.backToEdit = function () {
+  window.location.href = "order.html";
+};
+if (window.location.pathname.endsWith("confirm.html")) {
+  window.loadPendingOrder();
+}
+if (window.location.pathname.endsWith("success.html")) {
+  window.loadOrderSummary();
+}
+
 
   // 从所有商品输入中收集数量
   const items = [];
@@ -137,6 +236,77 @@ window.placeOrder = async function () {
   if (items.length === 0) {
     return alert("请至少选择一种商品（数量 > 0）");
   }
+// 第二步：确认页点击“确认下单” → 真正写入数据库 → 跳到支付页
+window.confirmOrder = async function () {
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    alert("请先登录！");
+    return (window.location.href = "index.html");
+  }
+
+  const pending = getPendingOrder();
+  if (!pending) {
+    alert("没有找到待确认的订单，请重新填写。");
+    return (window.location.href = "order.html");
+  }
+
+  const name = localStorage.getItem("name");
+  const qq = localStorage.getItem("qq");
+
+  const orderGroup =
+    "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
+  const now = new Date().toISOString();
+
+  // 1）插 orders 主表
+  const { data: orderRow, error: orderError } = await supabase
+    .from("orders")
+    .insert({
+      user_id: userId,
+      recipient: pending.recipient,
+      phone: pending.phone,
+      address: pending.address,
+      status: "待发货",
+      tracking: "",
+      payment_status: "未支付",
+      pay_method: "",
+      order_group: orderGroup,
+      login_name: name,
+      login_qq: qq,
+      total_amount: pending.totalAmount,
+      time: now
+    })
+    .select()
+    .single();
+
+  if (orderError) {
+    return alert("下单失败：" + orderError.message);
+  }
+
+  const orderId = orderRow.id;
+
+  // 2）插 order_items 明细
+  const itemRows = pending.items.map(it => ({
+    order_id: orderId,
+    product: it.name,
+    quantity: it.quantity,
+    unit_price: it.price,
+    subtotal: it.subtotal
+  }));
+
+  const { error: itemsError } = await supabase
+    .from("order_items")
+    .insert(itemRows);
+
+  if (itemsError) {
+    alert("主订单已创建，但明细保存失败：" + itemsError.message);
+  }
+
+  // 清掉待确认订单，防止重复提交
+  localStorage.removeItem("pendingOrder");
+
+  // 跳到支付页
+  window.location.href = "success.html?og=" + encodeURIComponent(orderGroup);
+};
 
   // 计算总金额
   let totalAmount = 0;
