@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>小店下单系统</title>
+</head>
+<body>
+  <h2>🛒 小店下单系统</h2>
+
+  <div>
+    <label>名字：</label>
+    <input id="name" />
+    <label>ID：</label>
+    <input id="userId" />
+    <button onclick="saveUser()">保存</button>
+  </div>
+
+  <hr>
+
+  <div>
+    <h3>下单</h3>
+    <input id="orderName" placeholder="商品名" />
+    <input id="quantity" type="number" placeholder="数量" value="1" min="1" />
+    <button onclick="placeOrder()">提交订单</button>
+  </div>
+
+  <hr>
+
+  <div>
+    <h3>我的订单</h3>
+    <button onclick="loadOrders()">刷新</button>
+    <ul id="ordersList"></ul>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
