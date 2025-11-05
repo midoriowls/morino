@@ -455,6 +455,42 @@ window.confirmPayment = async function () {
   }
 };
 
+window.loadDetail = async function () {
+  const params = new URLSearchParams(window.location.search);
+  const orderGroup = params.get("og");
+  if (!orderGroup) {
+    document.getElementById("orderDetail").innerText = "未找到订单编号。";
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("order_group", orderGroup)
+    .single();
+
+  const box = document.getElementById("orderDetail");
+
+  if (error || !data) {
+    box.innerText = "加载订单失败。";
+    return;
+  }
+
+  box.innerHTML = `
+    <p><b>订单编号：</b>${data.order_group}</p>
+    <p><b>下单时间：</b>${data.time || ""}</p>
+    <p><b>商品：</b>${data.main_product}</p>
+    <p><b>金额：</b>￥${data.total_amount}</p>
+    <p><b>收件人：</b>${data.recipient}（${data.phone}）</p>
+    <p><b>地址：</b>${data.address}</p>
+    <p><b>支付状态：</b>${data.payment_status || "未支付"}</p>
+    <p><b>发货状态：</b>${data.status || "待发货"}</p>
+    ${data.tracking ? `<p><b>快递单号：</b>${data.tracking}</p>` : ""}
+  `;
+};
+
+
+
 // ========== 我的订单：每行一单 ==========
 
 window.loadOrders = async function () {
