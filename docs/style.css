@@ -14,6 +14,10 @@ body {
   margin: 40px auto;
 }
 
+h2, h3 {
+  margin-top: 0;
+}
+
 input, select, button {
   display: block;
   width: 100%;
@@ -34,9 +38,57 @@ button {
 button:hover {
   background: #45a049;
 }
-a { color: #007BFF; text-decoration: none; }
-a:hover { text-decoration: underline; }
 
+a { 
+  color: #007BFF; 
+  text-decoration: none; 
+}
+a:hover { 
+  text-decoration: underline; 
+}
+
+/* 商品列表样式 */
+.product-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  background: #fafafa;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-name {
+  font-weight: 600;
+}
+
+.product-price {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.product-desc {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.product-qty input {
+  width: 80px;
+  text-align: center;
+}
+
+/* 手机端适配 */
 @media (max-width: 480px) {
   .container {
     margin: 20px;
@@ -44,6 +96,10 @@ a:hover { text-decoration: underline; }
   }
   input, select, button {
     font-size: 16px;
+  }
+  .product-item {
+    flex-direction: row;
+    align-items: flex-start;
   }
 }
 
