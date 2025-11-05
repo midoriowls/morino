@@ -481,12 +481,19 @@ window.loadOrders = async function () {
     return;
   }
 
-  data.forEach((o) => {
+  data.forEach(o => {
     const payStatus = o.payment_status || "未支付";
     const payMethod = o.pay_method ? `（${o.pay_method}）` : "";
     const orderNo = o.order_group || o.id;
-    const amount =
-      o.total_amount != null ? Number(o.total_amount) : null;
+    const amount = o.total_amount != null ? Number(o.total_amount) : null;
+  
+    const displayTime = o.time
+      ? new Date(o.time).toLocaleString("zh-CN", {
+          timeZone: "Asia/Shanghai",
+          hour12: false
+        })
+      : "";
+  
     list.innerHTML += `
       <li>
         订单编号：${orderNo}<br>
@@ -496,10 +503,11 @@ window.loadOrders = async function () {
         发货状态：${o.status || ""}<br>
         支付状态：${payStatus}${payMethod}<br>
         ${o.tracking ? "快递单号：📦 " + o.tracking + "<br>" : ""}
-        <small>${o.time ? new Date(o.time).toLocaleString() : ""}</small><br>
+        <small>${displayTime}</small><br>
         <a href="success.html?og=${encodeURIComponent(orderNo)}">查看明细</a>
       </li><hr>`;
   });
+
 };
 
 // ========== 根据当前页面自动加载需要的数据 ==========
