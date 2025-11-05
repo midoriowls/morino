@@ -129,6 +129,8 @@ window.placeOrder = async function() {
     payment_status: "未支付",
     pay_method: "",
     order_group: orderGroup,
+    login_name: name,
+    login_qq:   qq,
     time:     now
   }));
 
