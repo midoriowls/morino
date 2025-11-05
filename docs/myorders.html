@@ -2,12 +2,15 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我的订单</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h2>📦 我的订单</h2>
+    <p id="userInfo"></p>
+    <button onclick="logout()">退出登录</button>
     <button onclick="loadOrders()">刷新</button>
     <ul id="ordersList"></ul>
     <p><a href="order.html">← 返回下单页</a></p>
@@ -16,3 +19,4 @@
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
