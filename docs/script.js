@@ -7,35 +7,55 @@ const supabaseUrl = "https://gtseeznprlqpbklkfgup.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0c2Vlem5wcmxxcGJrbGtmZ3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNDcwNDAsImV4cCI6MjA3NzkyMzA0MH0.cPPS2UNhRtyJ0CMA7xdzqSd0ZVBwdncVFb0Ho0foJfU";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// 保存用户信息
-window.saveUser = function() {
+// 登录或注册
+window.loginOrRegister = async function() {
   const name = document.getElementById("name").value.trim();
   const qq = document.getElementById("qq").value.trim();
-  if (!name || !qq) return alert("请填写名字和QQ！");
+  if (!name || !qq) return alert("请输入名字和QQ号！");
+
+  // 查询是否存在
+  const { data: existing } = await supabase
+    .from("users")
+    .select("*")
+    .eq("name", name)
+    .eq("qq", qq);
+
+  let userId;
+  if (existing.length > 0) {
+    userId = existing[0].id;
+    alert("登录成功！");
+  } else {
+    const { data, error } = await supabase
+      .from("users")
+      .insert({ name, qq })
+      .select();
+    if (error) return alert("注册失败：" + error.message);
+    userId = data[0].id;
+    alert("注册成功！");
+  }
+
+  localStorage.setItem("userId", userId);
   localStorage.setItem("name", name);
   localStorage.setItem("qq", qq);
-  alert("保存成功！");
+
+  window.location.href = "order.html";
 };
 
-// 提交订单
+// 下单
 window.placeOrder = async function() {
-  const name = localStorage.getItem("name");
-  const qq = localStorage.getItem("qq");
+  const userId = localStorage.getItem("userId");
+  if (!userId) return alert("请先登录！");
   const product = document.getElementById("product").value;
   const quantity = parseInt(document.getElementById("quantity").value || "1");
-
-  if (!name || !qq) return alert("请先填写名字和QQ！");
-  if (quantity <= 0) return alert("数量必须大于0！");
+  const address = document.getElementById("address").value.trim();
 
   const { error } = await supabase.from("orders").insert({
-    name,
-    qq,
+    user_id: userId,
     product,
     quantity,
+    address,
     status: "待发货",
     tracking: "",
-    address: "",
-    payment: false,
     time: new Date().toISOString()
   });
 
@@ -45,12 +65,12 @@ window.placeOrder = async function() {
 
 // 加载订单
 window.loadOrders = async function() {
-  const qq = localStorage.getItem("qq");
-  if (!qq) return alert("请先填写QQ！");
+  const userId = localStorage.getItem("userId");
+  if (!userId) return alert("请先登录！");
   const { data, error } = await supabase
     .from("orders")
     .select("*")
-    .eq("qq", qq)
+    .eq("user_id", userId)
     .order("time", { ascending: false });
 
   const list = document.getElementById("ordersList");
@@ -63,9 +83,12 @@ window.loadOrders = async function() {
     data.forEach(o => {
       list.innerHTML += `
         <li>
-          ${o.product} × ${o.quantity} — ${o.status}
-          ${o.tracking ? " 📦 " + o.tracking : ""}
-        </li>`;
+          <b>${o.product}</b> × ${o.quantity}<br>
+          📍 ${o.address}<br>
+          状态：${o.status}
+          ${o.tracking ? "📦 " + o.tracking : ""}<br>
+          <small>${new Date(o.time).toLocaleString()}</small>
+        </li><hr>`;
     });
   }
 };
