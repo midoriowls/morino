@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>下单成功</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>✅ 订单创建成功！</h2>
+    <p id="userInfo"></p>
+
+    <p>订单编号：<span id="orderGroup"></span></p>
+    <p>本次订单总金额：<b><span id="totalAmount">0</span> 元</b></p>
+
+    <h3>付款方式</h3>
+    <p>请先扫码付款，并在备注中写：<b>登录用姓名 + QQ</b>。</p>
+
+    <div style="display:flex; gap:10px; justify-content:space-between; margin:10px 0;">
+      <div style="flex:1; text-align:center;">
+        <p>微信付款码</p>
+        <img src="wechat.jpg" alt="微信付款码" style="width:100%;">
+      </div>
+      <div style="flex:1; text-align:center;">
+        <p>支付宝付款码</p>
+        <img src="alipay.jpg" alt="支付宝付款码" style="width:100%;">
+      </div>
+    </div>
+
+    <label>选择你使用的支付方式：</label>
+    <select id="payMethod">
+      <option value="微信">微信</option>
+      <option value="支付宝">支付宝</option>
+    </select>
+
+    <button onclick="confirmPayment()">我已付款，提交支付信息</button>
+
+    <p><a href="myorders.html">查看我的订单 →</a></p>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
+
