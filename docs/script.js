@@ -78,39 +78,84 @@ renderProductList();
 window.loginOrRegister = async function () {
   const nameInput = document.getElementById("name");
   const qqInput = document.getElementById("qq");
+  const pwdInput = document.getElementById("password");
+
   const name = nameInput ? nameInput.value.trim() : "";
   const qq = qqInput ? qqInput.value.trim() : "";
-  if (!name || !qq) return alert("请输入名字和QQ号！");
+  const password = pwdInput ? pwdInput.value.trim() : "";
 
+  if (!qq || !password) {
+    alert("请填写 QQ 和密码！");
+    return;
+  }
+
+  // 先看这个 QQ 是否已经注册
   const { data: existing, error: selectError } = await supabase
     .from("users")
     .select("*")
-    .eq("name", name)
     .eq("qq", qq);
 
-  if (selectError) return alert("登录失败：" + selectError.message);
-
-  let userId;
-  if (existing && existing.length > 0) {
-    userId = existing[0].id;
-    alert("登录成功！");
-  } else {
-    const { data, error } = await supabase
-      .from("users")
-      .insert({ name, qq })
-      .select()
-      .single();
-    if (error) return alert("注册失败：" + error.message);
-    userId = data.id;
-    alert("注册成功！");
+  if (selectError) {
+    alert("登录失败：" + selectError.message);
+    return;
   }
 
+  let userId;
+  let finalName;
+
+  if (!existing || existing.length === 0) {
+    // 这个 QQ 没出现过：走自动注册
+    if (!name) {
+      alert("新用户注册时请填写昵称！");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("users")
+      .insert({
+        name,
+        qq,
+        password
+      })
+      .select()
+      .single();
+
+    if (error) {
+      alert("注册失败：" + error.message);
+      return;
+    }
+
+    userId = data.id;
+    finalName = data.name;
+    alert("注册成功，已自动登录！");
+
+  } else {
+    // 这个 QQ 已经存在：只允许用密码登录
+    const user = existing[0];
+
+    if (!user.password) {
+      alert("该账号还没有设置密码，请先联系你自己手动在后台给它填一个密码再登录 😅");
+      return;
+    }
+
+    if (user.password !== password) {
+      alert("密码错误，请重试。");
+      return;
+    }
+
+    userId = user.id;
+    finalName = user.name;
+    alert("登录成功！");
+  }
+
+  // 统一设置本地登录状态
   localStorage.setItem("userId", userId);
-  localStorage.setItem("name", name);
+  localStorage.setItem("name", finalName || "");
   localStorage.setItem("qq", qq);
 
   window.location.href = "order.html";
 };
+
 
 // 退出登录
 window.logout = function () {
