@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>确认订单</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>✅ 确认订单</h2>
+    <p id="userInfo"></p>
+
+    <div id="confirmShipping"></div>
+    <div id="confirmItems"></div>
+    <p><b>本次订单总金额：<span id="confirmTotal">0</span> 元</b></p>
+
+    <p style="color:#c00;font-size:13px;line-height:1.5;">
+      ⚠️ 请务必确认商品、数量和收货信息无误。<br>
+      提交后即视为确认下单，<b>如无特别情况恕不退款 / 不退不换</b>。<br>
+    </p>
+    <button onclick="backToEdit()">返回修改</button>
+    <button onclick="confirmOrder()">确认下单</button>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
