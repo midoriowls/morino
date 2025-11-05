@@ -418,6 +418,12 @@ window.loadOrderSummary = async function () {
   if (totalEl) totalEl.textContent = total.toString();
   if (ogEl) ogEl.textContent = og;
   if (detailsEl) detailsEl.innerHTML = detailsHtml;
+
+  const view = getQueryParam("view");
+  if (view === "1") {
+    const paySection = document.getElementById("paySection");
+    if (paySection) paySection.style.display = "none";
+  }
 };
 
 // 支付页：确认已付款（设置等待确认支付，跳我的订单）
