@@ -7,6 +7,13 @@ const supabaseUrl = "https://gtseeznprlqpbklkfgup.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0c2Vlem5wcmxxcGJrbGtmZ3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNDcwNDAsImV4cCI6MjA3NzkyMzA0MH0.cPPS2UNhRtyJ0CMA7xdzqSd0ZVBwdncVFb0Ho0foJfU";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const PRICE_MAP = {
+  "T恤": 99,
+  "帆布袋": 49,
+  "贴纸包": 25,
+  "马克杯": 79
+};
+
 
 // ========== 工具函数 ==========
 
