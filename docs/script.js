@@ -588,6 +588,12 @@ window.loadOrders = async function () {
 // ========== 根据当前页面自动加载需要的数据 ==========
 
 const path = window.location.pathname;
+
+if (path.endsWith("order.html")) {
+  // 下单页：先画商品，再从 pendingOrder 恢复表单
+  renderProductList();
+  restoreOrderFormFromPending();
+}
 if (path.endsWith("confirm.html")) {
   window.loadPendingOrder();
 }
@@ -596,4 +602,7 @@ if (path.endsWith("success.html")) {
 }
 if (path.endsWith("myorders.html")) {
   window.loadOrders();
+}
+if (path.endsWith("detail.html")) {
+  window.loadDetail && window.loadDetail();
 }
