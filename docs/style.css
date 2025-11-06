@@ -293,5 +293,41 @@ a:hover {
   padding: 0;               /* 让外层控制内边距 */
 }
 
+/* ===== 统一全站按钮风格：与登录页一致 ===== */
+button,
+.btn-primary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;  /* 超圆润 */
+  border: none;
+  cursor: pointer;
+  background: #4caf50;   /* 登录页绿色 */
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+  transition: all 0.15s ease;
+}
+
+button:hover,
+.btn-primary:hover {
+  background: #43a047; /* 稍深一点的绿色 */
+}
+
+button:active,
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.4);
+}
+
+/* 小屏按钮稍微大一点 */
+@media (max-width: 480px) {
+  button,
+  .btn-primary {
+    font-size: 16px;
+    padding: 14px 0;
+  }
+}
 
 
