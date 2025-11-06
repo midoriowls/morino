@@ -342,7 +342,7 @@ button,
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: #4caf50;
+  background: linear-gradient(145deg, #4e8c78, #5fa08a);;
   color: #fff;
   box-shadow: 0 4px 10px rgba(122, 164, 160, 0.3);
   transition: all 0.2s ease;
