@@ -331,7 +331,7 @@ button:active,
 }
 
 
-/* ===== 🌿 主按钮（绿色，与登录页一致） ===== */
+/* ===== 🌿 主按钮：莫兰迪蓝绿调 ===== */
 button,
 .btn-primary {
   width: 100%;
@@ -342,24 +342,24 @@ button,
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: #4caf50;
+  background: linear-gradient(145deg, #7ca9a6, #88c0b6); /* 莫兰迪蓝绿渐变 */
   color: #fff;
-  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
-  transition: all 0.15s ease;
+  box-shadow: 0 4px 10px rgba(122, 164, 160, 0.3);
+  transition: all 0.2s ease;
 }
 
 button:hover,
 .btn-primary:hover {
-  background: #43a047;
+  background: linear-gradient(145deg, #6ba6a1, #7bb9b0);
 }
 
 button:active,
 .btn-primary:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 2px 5px rgba(122, 164, 160, 0.3);
 }
 
-/* ===== 💙 次级按钮（蓝色渐变，用于“查看订单”、“返回”等） ===== */
+/* ===== 💙 次级按钮：柔和灰蓝调 ===== */
 .btn-secondary {
   display: inline-block;
   width: 100%;
@@ -370,35 +370,36 @@ button:active,
   text-align: center;
   border-radius: 999px;
   color: white;
-  background: linear-gradient(90deg, #3fa9f5, #007bff);
+  background: linear-gradient(145deg, #9cbad1, #87a9c3);
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(63, 169, 245, 0.3);
-  text-decoration: none; /* 去掉a标签下划线 */
-  transition: all 0.15s ease;
+  box-shadow: 0 4px 10px rgba(135, 169, 195, 0.3);
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(90deg, #3698e8, #006ee6);
+  background: linear-gradient(145deg, #8aaec4, #7a9bb7);
 }
 
 .btn-secondary:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 5px rgba(63, 169, 245, 0.3);
+  box-shadow: 0 2px 5px rgba(135, 169, 195, 0.3);
 }
 
-/* ===== ⚠️ 危险/删除类按钮（红色） ===== */
+/* ===== ⚠️ 危险按钮（保持红色） ===== */
 .btn-danger {
-  background: #e53935;
-  box-shadow: 0 4px 10px rgba(229, 57, 53, 0.4);
+  background: #d96c6c;
+  box-shadow: 0 4px 10px rgba(217, 108, 108, 0.4);
 }
 .btn-danger:hover {
-  background: #d32f2f;
+  background: #c35f5f;
 }
 .btn-danger:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 5px rgba(229, 57, 53, 0.4);
+  box-shadow: 0 2px 5px rgba(217, 108, 108, 0.4);
 }
+
 
 /* ===== 手机端小优化 ===== */
 @media (max-width: 480px) {
