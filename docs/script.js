@@ -215,8 +215,33 @@ window.logout = function () {
 };
 
 // ========== 第一步：下单页 → 生成待确认订单，跳转确认页 ==========
+window.goToConfirm = function () {
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    alert("请先登录！");
+    window.location.href = "index.html";
+    return;
+  }
 
-// ========== 第一步：下单页 → 生成待确认订单，跳转确认页 ==========
+  const recipientEl = document.getElementById("recipient");
+  const phoneEl = document.getElementById("phone");
+  const addressEl = document.getElementById("address");
+  const remarkEl = document.getElementById("remark"); // 备注输入框
+
+  const recipient = recipientEl ? recipientEl.value.trim() : "";
+  const phone = phoneEl ? phoneEl.value.trim() : "";
+  const address = addressEl ? addressEl.value.trim() : "";
+  const remark = remarkEl ? remarkEl.value.trim() : "";
+
+  const agreeEl = document.getElementById("agreePrivacy");
+  if (!agreeEl || !agreeEl.checked) {
+    alert("请先勾选“我已阅读并同意隐私说明与购买免责声明”");
+    return;
+  }
+  if (!recipient || !phone || !address) {
+    alert("收件人、联系方式和地址必须全部填写！");
+    return;
+  }
 
   const items = [];
   let itemsTotal = 0;   // ✅ 商品小计
@@ -227,7 +252,7 @@ window.logout = function () {
     const qty = parseInt(input.value || "0", 10);
     if (qty > 0) {
       const subtotal = p.price * qty;
-      itemsTotal += subtotal;   // ✅ 累加到 itemsTotal
+      itemsTotal += subtotal;
       items.push({
         id: p.id,
         name: p.name,
@@ -243,7 +268,7 @@ window.logout = function () {
     return;
   }
 
-  const shippingFee = SHIPPING_FEE;              // 本单运费（全局常量）
+  const shippingFee = SHIPPING_FEE;              // 本单运费
   const totalAmount = itemsTotal + shippingFee;  // 总金额 = 商品小计 + 运费
 
   const pending = {
@@ -258,9 +283,9 @@ window.logout = function () {
   };
 
   setPendingOrder(pending);
-
   window.location.href = "confirm.html";
 };
+
 
 // ========== 第二步：确认页展示待确认订单 ==========
 
