@@ -331,3 +331,84 @@ button:active,
 }
 
 
+/* ===== 🌿 主按钮（绿色，与登录页一致） ===== */
+button,
+.btn-primary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #4caf50;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+  transition: all 0.15s ease;
+}
+
+button:hover,
+.btn-primary:hover {
+  background: #43a047;
+}
+
+button:active,
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.4);
+}
+
+/* ===== 💙 次级按钮（蓝色渐变，用于“查看订单”、“返回”等） ===== */
+.btn-secondary {
+  display: inline-block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 11px 0;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 999px;
+  color: white;
+  background: linear-gradient(90deg, #3fa9f5, #007bff);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(63, 169, 245, 0.3);
+  text-decoration: none; /* 去掉a标签下划线 */
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(90deg, #3698e8, #006ee6);
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(63, 169, 245, 0.3);
+}
+
+/* ===== ⚠️ 危险/删除类按钮（红色） ===== */
+.btn-danger {
+  background: #e53935;
+  box-shadow: 0 4px 10px rgba(229, 57, 53, 0.4);
+}
+.btn-danger:hover {
+  background: #d32f2f;
+}
+.btn-danger:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(229, 57, 53, 0.4);
+}
+
+/* ===== 手机端小优化 ===== */
+@media (max-width: 480px) {
+  button,
+  .btn-primary,
+  .btn-secondary {
+    font-size: 16px;
+    padding: 14px 0;
+  }
+}
+
+
+
