@@ -71,7 +71,39 @@ function renderProductList() {
     container.appendChild(row);
   });
 }
-renderProductList();
+// 从 pendingOrder 恢复下单页面的表单（收货信息 + 商品数量）
+function restoreOrderFormFromPending() {
+  // 不是下单页就不用恢复
+  if (!document.getElementById("productList")) return;
+
+  const pending = getPendingOrder();
+  if (!pending) return;
+
+  // 收货信息
+  const recipientEl = document.getElementById("recipient");
+  const phoneEl = document.getElementById("phone");
+  const addressEl = document.getElementById("address");
+
+  if (recipientEl) recipientEl.value = pending.recipient || "";
+  if (phoneEl) phoneEl.value = pending.phone || "";
+  if (addressEl) addressEl.value = pending.address || "";
+
+  // 商品数量
+  if (pending.items && Array.isArray(pending.items)) {
+    pending.items.forEach(it => {
+      // 先按 id 找，如果没有 id 就按 name 匹配
+      let prod = PRODUCTS.find(p => p.id === it.id);
+      if (!prod) {
+        prod = PRODUCTS.find(p => p.name === it.name);
+      }
+      if (!prod) return;
+      const input = document.getElementById("qty_" + prod.id);
+      if (input) {
+        input.value = it.quantity;
+      }
+    });
+  }
+}
 
 // ========== 登录 / 注册 ==========
 
