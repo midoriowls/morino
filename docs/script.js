@@ -375,14 +375,18 @@ window.confirmOrder = async function () {
   const orderGroup =
     "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
 
-  // 这里你已经用北京时间写入了
-  const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+  // 北京时间写入
+  const now = new Date().toLocaleString("zh-CN", {
+    timeZone: "Asia/Shanghai",
+  });
 
-  // 1）插 orders 主表（一单一行，含总金额）
-  const itemsTotal = pending.itemsTotal ?? pending.totalAmount;
-  const shippingFee = pending.shippingFee ?? SHIPPING_FEE;
-  const totalAmount = pending.totalAmount ?? (itemsTotal + shippingFee);
+  // 计算金额：商品小计 + 运费
+  const itemsTotal = pending.itemsTotal ?? 0;          // 商品小计
+  const shippingFee = pending.shippingFee ?? SHIPPING_FEE; // 运费（用全局配置）
+  const totalAmount =
+    pending.totalAmount ?? itemsTotal + shippingFee;   // 总金额（含运费）
 
+  // 1）插 orders 主表（一单一行）
   const { data: orderRow, error: orderError } = await supabase
     .from("orders")
     .insert({
@@ -401,11 +405,10 @@ window.confirmOrder = async function () {
       main_product: pending.items
         .map((i) => `${i.name}×${i.quantity}`)
         .join("、"),
-      shipping_fee: shippingFee,   // 🆕 本单运费
-      total_amount: totalAmount,   // 🆕 总金额（含运费）
+      shipping_fee: shippingFee,   // 本单运费
+      total_amount: totalAmount,   // 总金额（含运费）
       time: now,
     })
-
     .select()
     .single();
 
@@ -413,6 +416,34 @@ window.confirmOrder = async function () {
     alert("下单失败：" + orderError.message);
     return;
   }
+
+  const orderId = orderRow.id;
+
+  // 2）插 order_items 明细
+  const itemRows = pending.items.map((it) => ({
+    order_id: orderId,
+    product: it.name,
+    quantity: it.quantity,
+    unit_price: it.price,
+    subtotal: it.subtotal,
+  }));
+
+  const { error: itemsError } = await supabase
+    .from("order_items")
+    .insert(itemRows);
+
+  if (itemsError) {
+    alert("主订单已创建，但明细保存失败：" + itemsError.message);
+    // 不中断流程，让用户继续看到订单成功
+  }
+
+  // 清掉 pending，防止重复提交
+  localStorage.removeItem("pendingOrder");
+
+  window.location.href =
+    "success.html?og=" + encodeURIComponent(orderGroup);
+};
+
 
   const orderId = orderRow.id;
 
