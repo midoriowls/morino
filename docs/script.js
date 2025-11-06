@@ -7,7 +7,7 @@ const supabaseUrl = "https://gtseeznprlqpbklkfgup.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0c2Vlem5wcmxxcGJrbGtmZ3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNDcwNDAsImV4cCI6MjA3NzkyMzA0MH0.cPPS2UNhRtyJ0CMA7xdzqSd0ZVBwdncVFb0Ho0foJfU";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ======= 商品配置（改这里就能改所有商品 & 价格） =======
+// ======= 订单配置（改这里就能改所有订单 & 价格） =======
 const PRODUCTS = [
   { id: "work1",  name: "春日",    price: 49, desc: "morino出品必属精品" },
   { id: "work2",     name: "开封府地契", price: 9999, desc: "购买即送开封府尹" },
@@ -60,7 +60,7 @@ function formatCNTime(t) {
 }
 
 
-// ========== 下单页：渲染商品列表 ==========
+// ========== 下单页：渲染订单列表 ==========
 
 function renderProductList() {
   const container = document.getElementById("productList");
@@ -83,7 +83,7 @@ function renderProductList() {
     container.appendChild(row);
   });
 }
-// 从 pendingOrder 恢复下单页面的表单（收货信息 + 商品数量）
+// 从 pendingOrder 恢复下单页面的表单（收货信息 + 订单数量）
 function restoreOrderFormFromPending() {
   // 不是下单页就不用恢复
   if (!document.getElementById("productList")) return;
@@ -103,7 +103,7 @@ function restoreOrderFormFromPending() {
   if (remarkEL) remarkEL.value = pending.remark || "";
 
 
-  // 商品数量
+  // 订单数量
   if (pending.items && Array.isArray(pending.items)) {
     pending.items.forEach(it => {
       // 先按 id 找，如果没有 id 就按 name 匹配
@@ -231,7 +231,7 @@ window.goToConfirm = function () {
   const recipient = recipientEl ? recipientEl.value.trim() : "";
   const phone = phoneEl ? phoneEl.value.trim() : "";
   const address = addressEl ? addressEl.value.trim() : "";
-  const remark = remarkEl ? remarkEl.value.trim() : ""; // 🆕 买家备注
+  const remark = remarkEl ? remarkEl.value.trim() : ""; // 🆕 用户备注
 
   const agreeEl = document.getElementById("agreePrivacy");
   if (!agreeEl || !agreeEl.checked) {
@@ -264,7 +264,7 @@ window.goToConfirm = function () {
   });
 
   if (items.length === 0) {
-    alert("请至少选择一种商品（数量 > 0）");
+    alert("请至少选择一种（数量 > 0）");
     return;
   }
 
@@ -317,7 +317,7 @@ window.loadPendingOrder = function () {
   }
 
   if (itemsEl) {
-    let html = "<h3>商品明细</h3><ul>";
+    let html = "<h3>订单明细</h3><ul>";
     pending.items.forEach((it) => {
       html += `<li>${it.name} × ${it.quantity} 个，单价 ￥${it.price}，小计 ￥${it.subtotal}</li>`;
     });
@@ -369,7 +369,7 @@ window.confirmOrder = async function () {
       recipient: pending.recipient,
       phone: pending.phone,
       address: pending.address,
-      remark: pending.remark || "",    // 🆕 保存买家备注
+      remark: pending.remark || "",    // 🆕 保存用户备注
       status: "待发货",
       tracking: "",
       payment_status: "未支付",
@@ -476,7 +476,7 @@ window.loadOrderSummary = async function () {
 
   // 🆕 如果有备注，在支付页下面也提示一下
   if (order.remark) {
-    detailsHtml += `<p style="margin-top:8px;font-size:12px;color:#666;">买家备注：${order.remark}</p>`;
+    detailsHtml += `<p style="margin-top:8px;font-size:12px;color:#666;">用户备注：${order.remark}</p>`;
   }
 
   const totalEl = document.getElementById("totalAmount");
@@ -564,7 +564,7 @@ window.loadDetail = async function () {
   box.innerHTML = `
     <p><b>订单编号：</b>${data.order_group}</p>
     <p><b>下单时间：</b>${formatCNTime(data.time)}</p>
-    <p><b>商品：</b>${data.main_product}</p>
+    <p><b>订单：</b>${data.main_product}</p>
     <p><b>金额：</b>￥${data.total_amount}</p>
     <p><b>收件人：</b>${data.recipient}（${data.phone}）</p>
     <p><b>地址：</b>${data.address}</p>
@@ -581,7 +581,16 @@ window.loadDetail = async function () {
         : ""
     }
     ${data.tracking ? `<p><b>快递单号：</b>${data.tracking}</p>` : ""}
-    ${data.remark ? `<p><b>买家备注：</b>${data.remark}</p>` : ""}
+    ${
+      data.remark
+        ? `
+          <div class="buyer-remark">
+            <div class="buyer-remark-label">用户备注</div>
+            <div class="buyer-remark-text">${data.remark}</div>
+          </div>
+        `
+        : ""
+    }
     ${
       data.admin_reply
         ? `<div class="admin-reply">店主回复：${data.admin_reply}</div>`
@@ -629,6 +638,13 @@ window.loadOrders = async function () {
 
     const displayTime = o.time || "";
 
+    const remarkLine = o.remark
+      ? `<span class="order-note">用户备注：${o.remark}</span><br>`
+      : "";
+    const replyLine = o.admin_reply
+      ? `<span class="order-note order-note-reply">站长回复：${o.admin_reply}</span><br>`
+      : "";
+
     list.innerHTML += `
       <li>
         订单编号：${orderNo}<br>
@@ -638,6 +654,8 @@ window.loadOrders = async function () {
         发货状态：${o.status || ""}<br>
         支付状态：${payStatus}${payMethod}<br>
         ${o.tracking ? "快递单号：📦 " + o.tracking + "<br>" : ""}
+        ${remarkLine}
+        ${replyLine}
         <small>${displayTime}</small><br>
         <a href="success.html?og=${encodeURIComponent(orderNo)}">查看明细</a>
       </li><hr>`;
@@ -649,7 +667,7 @@ window.loadOrders = async function () {
 const path = window.location.pathname;
 
 if (path.endsWith("order.html")) {
-  // 下单页：先画商品，再从 pendingOrder 恢复表单
+  // 下单页：先画订单，再从 pendingOrder 恢复表单
   renderProductList();
   restoreOrderFormFromPending();
 }
