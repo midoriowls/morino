@@ -1,23 +1,57 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>登录 / 注册</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="container">
-    <h2>🧾 登录 / 注册</h2>
-    <p>新用户将自动注册。网站未设找回密码功能，如果忘记密码请及时联系站长</p>
-    <input id="name" placeholder="昵称（新用户注册必填，已存在用户登录不用填写）">
-    <input id="qq" placeholder="QQ号（作为登录账号，新用户将自动注册）">
-    <input id="password" placeholder="密码（为了信息安全，建议不要填写自己的常用密码）">
-  
-    <button onclick="loginOrRegister()">登录 / 注册</button>
-    <p>感谢chatgpt，这个网站所有代码都它写的。我是一点都写不来。</p>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">🧺</div>
+      <h1 class="auth-title">小本生意小店</h1>
+      <p class="auth-subtitle">
+        使用 QQ 号登录 / 注册<br />
+        第一次登录会自动创建账号
+      </p>
+    </div>
+
+    <div class="auth-form">
+      <div class="input-group">
+        <label for="name">昵称（新用户必填）</label>
+        <input id="name" type="text" placeholder="例：星之卡比" />
+      </div>
+
+      <div class="input-group">
+        <label for="qq">QQ 号</label>
+        <input id="qq" type="text" placeholder="用于登录与联系" />
+      </div>
+
+      <div class="input-group">
+        <label for="password">密码</label>
+        <!-- 按你的要求：明文展示，不要点点点 -->
+        <input id="password" type="text" placeholder="设置一个自己记得住的密码" />
+        <small class="input-hint">首次使用：将用此密码自动注册；之后请用同一密码登录。</small>
+      </div>
+
+      <button class="auth-button" onclick="loginOrRegister()">
+        登录 / 注册
+      </button>
+
+      <p class="auth-tip">
+        登录后即可填写收货信息并下单。
+      </p>
+    </div>
+
+    <div class="auth-footer">
+      <a href="privacy.html" target="_blank">隐私政策与购买免责声明</a>
+    </div>
   </div>
+
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
 
