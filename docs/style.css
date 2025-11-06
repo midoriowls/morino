@@ -247,3 +247,40 @@ a:hover {
   }
 }
 
+/* ===== 通用页面背景 + 卡片，用于下单 / 订单 / 支付 / 隐私等页面 ===== */
+
+.page-body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: linear-gradient(145deg, #fce3ff, #e5f0ff, #f5f6fa); /* 和登录页同系列 */
+  font-family: "Segoe UI", "PingFang SC", sans-serif;
+}
+
+.page-card {
+  width: 100%;
+  max-width: 960px; /* 内容页比登录页宽一点 */
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 20px 20px 16px;
+  box-sizing: border-box;
+  margin-top: 16px;
+}
+
+/* 小屏适配 */
+@media (max-width: 600px) {
+  .page-body {
+    padding: 10px;
+  }
+  .page-card {
+    padding: 16px 14px 12px;
+    border-radius: 14px;
+  }
+}
+
+
