@@ -419,6 +419,22 @@ button:active,
   margin-left: 1em;
 }
 
+#remark {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  font-size: 14px;
+  resize: vertical;
+  margin-top: 6px;
+}
+
+#remark:focus {
+  border-color: #5fa08a;
+  box-shadow: 0 0 0 2px rgba(95, 160, 138, 0.15);
+  outline: none;
+}
 
 
 
