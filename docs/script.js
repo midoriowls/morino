@@ -254,7 +254,7 @@ window.goToConfirm = function () {
     const qty = parseInt(input.value || "0", 10);
     if (qty > 0) {
       const subtotal = p.price * qty;
-      totalAmount += subtotal;
+      itemsTotal += subtotal;
       items.push({
         id: p.id,
         name: p.name,
@@ -266,16 +266,21 @@ window.goToConfirm = function () {
   });
 
   if (items.length === 0) {
-    alert("请至少选择一种（数量 > 0）");
+    alert("请至少选择一种商品（数量 > 0）");
     return;
   }
+
+  const shippingFee = SHIPPING_FEE;              // 本单运费
+  const totalAmount = itemsTotal + shippingFee;  // 总金额 = 商品小计 + 运费
 
   const pending = {
     recipient,
     phone,
     address,
-    remark,      // 🆕 把备注也放进待确认订单
+    remark,
     items,
+    itemsTotal,
+    shippingFee,
     totalAmount,
   };
   setPendingOrder(pending);
@@ -319,17 +324,27 @@ window.loadPendingOrder = function () {
   }
 
   if (itemsEl) {
-    let html = "<h3>订单明细</h3><ul>";
+    let html = "<h3>商品明细</h3><ul>";
     pending.items.forEach((it) => {
       html += `<li>${it.name} × ${it.quantity} 个，单价 ￥${it.price}，小计 ￥${it.subtotal}</li>`;
     });
     html += "</ul>";
+
+    const itemsTotal = pending.itemsTotal ?? pending.totalAmount;
+    const shippingFee = pending.shippingFee ?? SHIPPING_FEE;
+    const totalAmount = pending.totalAmount ?? (itemsTotal + shippingFee);
+
+    html += `<p>商品小计：￥${itemsTotal}</p>`;
+    html += `<p>运费：￥${shippingFee}</p>`;
+    html += `<p><b>订单总金额：￥${totalAmount}</b></p>`;
+
     itemsEl.innerHTML = html;
   }
 
   if (totalEl) {
-    totalEl.textContent = pending.totalAmount.toString();
+    totalEl.textContent = (pending.totalAmount ?? "").toString();
   }
+
 };
 
 // 返回修改
@@ -364,6 +379,10 @@ window.confirmOrder = async function () {
   const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
 
   // 1）插 orders 主表（一单一行，含总金额）
+  const itemsTotal = pending.itemsTotal ?? pending.totalAmount;
+  const shippingFee = pending.shippingFee ?? SHIPPING_FEE;
+  const totalAmount = pending.totalAmount ?? (itemsTotal + shippingFee);
+
   const { data: orderRow, error: orderError } = await supabase
     .from("orders")
     .insert({
@@ -371,7 +390,7 @@ window.confirmOrder = async function () {
       recipient: pending.recipient,
       phone: pending.phone,
       address: pending.address,
-      remark: pending.remark || "",    // 🆕 保存用户备注
+      remark: pending.remark || "",
       status: "待发货",
       tracking: "",
       payment_status: "未支付",
@@ -382,9 +401,11 @@ window.confirmOrder = async function () {
       main_product: pending.items
         .map((i) => `${i.name}×${i.quantity}`)
         .join("、"),
-      total_amount: pending.totalAmount,
+      shipping_fee: shippingFee,   // 🆕 本单运费
+      total_amount: totalAmount,   // 🆕 总金额（含运费）
       time: now,
     })
+
     .select()
     .single();
 
@@ -476,16 +497,19 @@ window.loadOrderSummary = async function () {
   });
   detailsHtml += "</ul>";
 
-  // 🆕 如果有备注，在支付页下面也提示一下
-  if (order.remark) {
-    detailsHtml += `<p style="margin-top:8px;font-size:12px;color:#666;">用户备注：${order.remark}</p>`;
-  }
+  const shipping = Number(order.shipping_fee || 0);
+  const itemsTotal = Number(total) - shipping;
+
+  detailsHtml += `<p>商品小计：￥${itemsTotal}</p>`;
+  detailsHtml += `<p>运费：￥${shipping}</p>`;
+  detailsHtml += `<p><b>订单总金额：￥${total}</b></p>`;
 
   const totalEl = document.getElementById("totalAmount");
   const ogEl = document.getElementById("orderGroup");
   const detailsEl = document.getElementById("orderDetails");
 
   if (totalEl) totalEl.textContent = total.toString();
+
   if (ogEl) ogEl.textContent = og;
   if (detailsEl) detailsEl.innerHTML = detailsHtml;
 
