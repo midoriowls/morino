@@ -342,7 +342,7 @@ button,
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: linear-gradient(145deg, #4e8c78, #5fa08a);
+  background: #4caf50;
   color: #fff;
   box-shadow: 0 4px 10px rgba(122, 164, 160, 0.3);
   transition: all 0.2s ease;
@@ -370,7 +370,7 @@ button:active,
   text-align: center;
   border-radius: 999px;
   color: white;
-  background: linear-gradient(145deg, #5a7fa8, #6a94c0);
+  background: linear-gradient(90deg, #3fa9f5, #007bff);
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(135, 169, 195, 0.3);
