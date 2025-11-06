@@ -48,6 +48,18 @@ function getPendingOrder() {
   }
 }
 
+// 把 Supabase 返回的时间转成北京时间，给前端显示用
+function formatCNTime(t) {
+  if (!t) return "—";
+  try {
+    const d = new Date(t);
+    return d.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+  } catch (e) {
+    return t || "—";
+  }
+}
+
+
 // ========== 下单页：渲染商品列表 ==========
 
 function renderProductList() {
@@ -514,18 +526,40 @@ window.loadDetail = async function () {
     return;
   }
 
+  // 格式化为北京时间
+  function formatCNTime(t) {
+    if (!t) return "—";
+    try {
+      const d = new Date(t);
+      return d.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+    } catch {
+      return t || "—";
+    }
+  }
+
   box.innerHTML = `
     <p><b>订单编号：</b>${data.order_group}</p>
-    <p><b>下单时间：</b>${data.time || ""}</p>
+    <p><b>下单时间：</b>${formatCNTime(data.time)}</p>
     <p><b>商品：</b>${data.main_product}</p>
     <p><b>金额：</b>￥${data.total_amount}</p>
     <p><b>收件人：</b>${data.recipient}（${data.phone}）</p>
     <p><b>地址：</b>${data.address}</p>
     <p><b>支付状态：</b>${data.payment_status || "未支付"}</p>
+    ${
+      data.payment_status === "已支付" || data.paid_at
+        ? `<p class="order-extra">支付时间：${formatCNTime(data.paid_at)}</p>`
+        : ""
+    }
     <p><b>发货状态：</b>${data.status || "待发货"}</p>
+    ${
+      data.status === "已发货" || data.shipped_at
+        ? `<p class="order-extra">发货时间：${formatCNTime(data.shipped_at)}</p>`
+        : ""
+    }
     ${data.tracking ? `<p><b>快递单号：</b>${data.tracking}</p>` : ""}
   `;
 };
+
 
 
 
