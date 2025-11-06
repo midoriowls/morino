@@ -103,3 +103,147 @@ a:hover {
   }
 }
 
+
+/* ===== 登录页专用样式 ===== */
+
+.auth-body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #fce3ff, #e5f0ff, #f5f6fa);
+  font-family: "Segoe UI", "PingFang SC", sans-serif;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 24px 22px 18px;
+  box-sizing: border-box;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.auth-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff7e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 8px;
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+.auth-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.auth-form {
+  margin-top: 12px;
+}
+
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.15);
+}
+
+.input-hint {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-top: 3px;
+}
+
+.auth-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #4caf50;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+.auth-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.4);
+}
+
+.auth-tip {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+
+.auth-footer {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.auth-footer a {
+  color: #666;
+  text-decoration: underline;
+}
+
+/* 手机端小优化 */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 22px 18px 16px;
+  }
+  .auth-title {
+    font-size: 20px;
+  }
+  .auth-subtitle {
+    font-size: 12px;
+  }
+  .auth-button {
+    font-size: 16px;
+  }
+}
+
