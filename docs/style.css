@@ -282,5 +282,16 @@ a:hover {
     border-radius: 14px;
   }
 }
+/* ===== 避免双层卡片的样式修正 ===== */
+/* 在使用 .page-body 的页面中，让 .container 只承担布局作用，不再重复生成白色卡片外观 */
+.page-body .container {
+  max-width: 100%;          /* 填满 page-card */
+  margin: 0;                /* 去掉原来的外边距 */
+  background: transparent;  /* 不要再画白底 */
+  box-shadow: none;         /* 去掉阴影 */
+  border-radius: 0;         /* 不要圆角（外层已经有） */
+  padding: 0;               /* 让外层控制内边距 */
+}
+
 
 
