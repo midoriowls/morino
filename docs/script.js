@@ -95,10 +95,13 @@ function restoreOrderFormFromPending() {
   const recipientEl = document.getElementById("recipient");
   const phoneEl = document.getElementById("phone");
   const addressEl = document.getElementById("address");
-
+  const remarkEL = document.getElementById("remark");
+  
   if (recipientEl) recipientEl.value = pending.recipient || "";
   if (phoneEl) phoneEl.value = pending.phone || "";
   if (addressEl) addressEl.value = pending.address || "";
+  if (remarkEL) remarkEL.value = pending.remark || "";
+
 
   // 商品数量
   if (pending.items && Array.isArray(pending.items)) {
@@ -210,6 +213,8 @@ window.logout = function () {
 
 // ========== 第一步：下单页 → 生成待确认订单，跳转确认页 ==========
 
+// ========== 第一步：下单页 → 生成待确认订单，跳转确认页 ==========
+
 window.goToConfirm = function () {
   const userId = localStorage.getItem("userId");
   if (!userId) {
@@ -221,9 +226,13 @@ window.goToConfirm = function () {
   const recipientEl = document.getElementById("recipient");
   const phoneEl = document.getElementById("phone");
   const addressEl = document.getElementById("address");
+  const remarkEl = document.getElementById("remark"); // 🆕 备注输入框
+
   const recipient = recipientEl ? recipientEl.value.trim() : "";
   const phone = phoneEl ? phoneEl.value.trim() : "";
   const address = addressEl ? addressEl.value.trim() : "";
+  const remark = remarkEl ? remarkEl.value.trim() : ""; // 🆕 买家备注
+
   const agreeEl = document.getElementById("agreePrivacy");
   if (!agreeEl || !agreeEl.checked) {
     alert("请先勾选“我已阅读并同意隐私说明与购买免责声明”");
@@ -263,6 +272,7 @@ window.goToConfirm = function () {
     recipient,
     phone,
     address,
+    remark,      // 🆕 把备注也放进待确认订单
     items,
     totalAmount,
   };
@@ -298,6 +308,11 @@ window.loadPendingOrder = function () {
       <p>收件人：${pending.recipient}</p>
       <p>联系方式：${pending.phone}</p>
       <p>地址：${pending.address}</p>
+      ${
+        pending.remark
+          ? `<p>备注：${pending.remark}</p>`
+          : `<p>备注：无</p>`
+      }
     `;
   }
 
@@ -342,8 +357,9 @@ window.confirmOrder = async function () {
 
   const orderGroup =
     "OG" + Date.now().toString() + Math.floor(Math.random() * 1000);
-  const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
 
+  // 这里你已经用北京时间写入了
+  const now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
 
   // 1）插 orders 主表（一单一行，含总金额）
   const { data: orderRow, error: orderError } = await supabase
@@ -353,6 +369,7 @@ window.confirmOrder = async function () {
       recipient: pending.recipient,
       phone: pending.phone,
       address: pending.address,
+      remark: pending.remark || "",    // 🆕 保存买家备注
       status: "待发货",
       tracking: "",
       payment_status: "未支付",
@@ -360,7 +377,9 @@ window.confirmOrder = async function () {
       order_group: orderGroup,
       login_name: name,
       login_qq: qq,
-      main_product: pending.items.map(i => `${i.name}×${i.quantity}`).join("、"),
+      main_product: pending.items
+        .map((i) => `${i.name}×${i.quantity}`)
+        .join("、"),
       total_amount: pending.totalAmount,
       time: now,
     })
@@ -454,6 +473,11 @@ window.loadOrderSummary = async function () {
     detailsHtml += `<li>${it.product} × ${it.quantity} 个，单价 ￥${unit}，小计 ￥${sub}</li>`;
   });
   detailsHtml += "</ul>";
+
+  // 🆕 如果有备注，在支付页下面也提示一下
+  if (order.remark) {
+    detailsHtml += `<p style="margin-top:8px;font-size:12px;color:#666;">买家备注：${order.remark}</p>`;
+  }
 
   const totalEl = document.getElementById("totalAmount");
   const ogEl = document.getElementById("orderGroup");
@@ -557,11 +581,14 @@ window.loadDetail = async function () {
         : ""
     }
     ${data.tracking ? `<p><b>快递单号：</b>${data.tracking}</p>` : ""}
+    ${data.remark ? `<p><b>买家备注：</b>${data.remark}</p>` : ""}
+    ${
+      data.admin_reply
+        ? `<div class="admin-reply">店主回复：${data.admin_reply}</div>`
+        : ""
+    }
   `;
 };
-
-
-
 
 // ========== 我的订单：每行一单 ==========
 
@@ -600,7 +627,6 @@ window.loadOrders = async function () {
     const amount =
       o.total_amount != null ? Number(o.total_amount) : null;
 
-    // ❗这里不再 new Date，不再转时区，直接用数据库里的字符串
     const displayTime = o.time || "";
 
     list.innerHTML += `
@@ -617,7 +643,6 @@ window.loadOrders = async function () {
       </li><hr>`;
   });
 };
-
 
 // ========== 根据当前页面自动加载需要的数据 ==========
 
