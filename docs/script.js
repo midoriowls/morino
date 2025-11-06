@@ -9,7 +9,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ======= 订单配置（改这里就能改所有订单 & 价格） =======
 const PRODUCTS = [
-  { id: "work1",  name: "春日",    price: 49, desc: "morino出品必属精品" },
   { id: "work2",     name: "开封府地契", price: 9999, desc: "购买即送开封府尹" },
   { id: "work3", name: "大鹅", price: 88, desc: "不羡仙驰名品牌，居家必备" },
   { id: "work4",     name: "寒姨", price: 99999, desc: "妈你快回来我要啃老" }
