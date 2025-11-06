@@ -197,11 +197,12 @@ window.loginOrRegister = async function () {
     alert("登录成功！");
   }
 
-  // 统一设置本地登录状态
+  // ✅ 到这里说明已经“登录成功”或“注册+登录成功”
   localStorage.setItem("userId", userId);
   localStorage.setItem("name", finalName || "");
   localStorage.setItem("qq", qq);
 
+  // 跳转到下单页面
   window.location.href = "order.html";
 };
 
@@ -217,36 +218,8 @@ window.logout = function () {
 
 // ========== 第一步：下单页 → 生成待确认订单，跳转确认页 ==========
 
-window.goToConfirm = function () {
-  const userId = localStorage.getItem("userId");
-  if (!userId) {
-    alert("请先登录！");
-    window.location.href = "index.html";
-    return;
-  }
-
-  const recipientEl = document.getElementById("recipient");
-  const phoneEl = document.getElementById("phone");
-  const addressEl = document.getElementById("address");
-  const remarkEl = document.getElementById("remark"); // 🆕 备注输入框
-
-  const recipient = recipientEl ? recipientEl.value.trim() : "";
-  const phone = phoneEl ? phoneEl.value.trim() : "";
-  const address = addressEl ? addressEl.value.trim() : "";
-  const remark = remarkEl ? remarkEl.value.trim() : ""; // 🆕 用户备注
-
-  const agreeEl = document.getElementById("agreePrivacy");
-  if (!agreeEl || !agreeEl.checked) {
-    alert("请先勾选“我已阅读并同意隐私说明与购买免责声明”");
-    return;
-  }
-  if (!recipient || !phone || !address) {
-    alert("收件人、联系方式和地址必须全部填写！");
-    return;
-  }
-
   const items = [];
-  let totalAmount = 0;
+  let itemsTotal = 0;   // ✅ 商品小计
 
   PRODUCTS.forEach((p) => {
     const input = document.getElementById("qty_" + p.id);
@@ -254,7 +227,7 @@ window.goToConfirm = function () {
     const qty = parseInt(input.value || "0", 10);
     if (qty > 0) {
       const subtotal = p.price * qty;
-      itemsTotal += subtotal;
+      itemsTotal += subtotal;   // ✅ 累加到 itemsTotal
       items.push({
         id: p.id,
         name: p.name,
@@ -270,7 +243,7 @@ window.goToConfirm = function () {
     return;
   }
 
-  const shippingFee = SHIPPING_FEE;              // 本单运费
+  const shippingFee = SHIPPING_FEE;              // 本单运费（全局常量）
   const totalAmount = itemsTotal + shippingFee;  // 总金额 = 商品小计 + 运费
 
   const pending = {
@@ -283,6 +256,7 @@ window.goToConfirm = function () {
     shippingFee,
     totalAmount,
   };
+
   setPendingOrder(pending);
 
   window.location.href = "confirm.html";
