@@ -9,10 +9,20 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ======= 订单配置（改这里就能改所有订单 & 价格） =======
 const PRODUCTS = [
-  { id: "work2",     name: "开封府地契", price: 9999, desc: "购买即送开封府尹" },
-  { id: "work3", name: "大鹅", price: 88, desc: "不羡仙驰名品牌，居家必备" },
-  { id: "work4",     name: "寒姨", price: 99999, desc: "妈你快回来我要啃老" }
+  { id: "work2", name: "开封府地契", price: 9999,  desc: "购买即送开封府尹" },
+  { id: "work3", name: "大鹅",       price: 88,    desc: "不羡仙驰名品牌，居家必备" },
+  { id: "work4", name: "寒姨",       price: 99999, desc: "妈你快回来我要啃老" }
 ];
+
+// ===== 每个本子的「总库存」只在这里改就行 =====
+const INITIAL_STOCK = {
+  "开封府地契": 30,   // 比如印了 30 本
+  "大鹅":       100,  // 大鹅 100 本
+  "寒姨":       5     // 寒姨 5 本
+};
+
+
+
 // === 全局配置：统一修改邮费只用改这里 ===
 const SHIPPING_FEE = 7;  // 单位：元，比如 12 块；以后要改就改这行
 
@@ -365,6 +375,48 @@ window.confirmOrder = async function () {
   if (!pending) {
     alert("没有找到待确认的订单，请重新填写。");
     window.location.href = "order.html";
+    return;
+  }
+  // === 在真正下单前，检查每个商品库存是否足够 ===
+  // 1）本次订单涉及哪些商品
+  const productNames = pending.items.map(it => it.name);
+
+  // 2）从 order_items 里查出这些商品「历史已售数量」
+  const { data: soldRows, error: soldError } = await supabase
+    .from("order_items")
+    .select("product, quantity")
+    .in("product", productNames);
+
+  if (soldError) {
+    alert("检查库存失败，请稍后再试：" + soldError.message);
+    return;
+  }
+
+  // 3）把已售数量累加到一个 map 里：{ 商品名: 已售多少 }
+  const soldMap = {};
+  (soldRows || []).forEach(row => {
+    const name = row.product;
+    const qty = Number(row.quantity) || 0;
+    soldMap[name] = (soldMap[name] || 0) + qty;
+  });
+
+  // 4）看本次下单有没有超过剩余库存
+  const lackItem = pending.items.find(it => {
+    const total = INITIAL_STOCK[it.name] ?? Infinity; // 如果没配置，视为无限
+    const sold = soldMap[it.name] || 0;
+    const left = total - sold;
+    return it.quantity > left;
+  });
+
+  if (lackItem) {
+    const total = INITIAL_STOCK[lackItem.name] ?? 0;
+    const sold = soldMap[lackItem.name] || 0;
+    const left = total - sold;
+    alert(
+      `抱歉，「${lackItem.name}」库存不足。\n` +
+      `总库存：${total} 本，已售：${sold} 本，剩余：${left} 本。\n` +
+      `请修改数量后再下单～`
+    );
     return;
   }
 
