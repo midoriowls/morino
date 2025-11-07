@@ -464,6 +464,19 @@ button:active,
 .order-note-reply {
   color: #4b6a9b; /* 店主回复稍微偏蓝一点 */
 }
+.stock-label {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #16a34a; /* 绿色字“可下单” */
+}
+
+.product-item.soldout {
+  opacity: 0.6;
+}
+
+.product-item.soldout .stock-label {
+  color: #b91c1c; /* 红色字“已售罄” */
+}
 
 
 
