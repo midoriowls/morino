@@ -75,26 +75,88 @@ function formatCNTime(t) {
 // ========== 下单页：渲染订单列表 ==========
 
 function renderProductList() {
-  const container = document.getElementById("productList");
-  if (!container) return; // 不是下单页就不渲染
+  const list = document.getElementById("productList");
+  if (!list) return;
+  list.innerHTML = "";
 
-  container.innerHTML = "";
   PRODUCTS.forEach((p) => {
-    const row = document.createElement("div");
-    row.className = "product-item";
-    row.innerHTML = `
+    const item = document.createElement("div");
+    item.className = "product-item";
+    item.id = "product_" + p.id;
+
+    item.innerHTML = `
       <div class="product-info">
         <div class="product-name">${p.name}</div>
         <div class="product-price">￥${p.price}</div>
-        ${p.desc ? `<div class="product-desc">${p.desc}</div>` : ""}
+        <div class="product-desc">${p.desc || ""}</div>
+        <div class="stock-label"></div> <!-- 🆕 用来写“有货/已售罄” -->
       </div>
       <div class="product-qty">
-        <input id="qty_${p.id}" type="number" min="0" value="0">
+        <input id="qty_${p.id}" type="number" min="0" value="0" />
       </div>
     `;
-    container.appendChild(row);
+    list.appendChild(item);
   });
 }
+// ===== 下单页：根据历史订单计算库存状态，只告诉“能买/卖光” =====
+async function loadStockStatus() {
+  // 这一步只拿商品名列表
+  const productNames = PRODUCTS.map((p) => p.name);
+
+  const { data, error } = await supabase
+    .from("order_items")
+    .select("product, quantity")
+    .in("product", productNames);
+
+  if (error) {
+    console.warn("加载库存状态失败：", error.message);
+    // 失败就当全是“可下单”，不打扰用户
+    return;
+  }
+
+  // 累加每个商品已售数量
+  const soldMap = {};
+  (data || []).forEach((row) => {
+    const name = row.product;
+    const qty = Number(row.quantity) || 0;
+    soldMap[name] = (soldMap[name] || 0) + qty;
+  });
+
+  // 根据总库存 - 已售，标记每个商品是否可下单
+  PRODUCTS.forEach((p) => {
+    const total = INITIAL_STOCK[p.name];
+    // 没配置库存的商品，当作无限有货
+    if (typeof total !== "number") return;
+
+    const sold = soldMap[p.name] || 0;
+    const left = total - sold;
+
+    const card = document.getElementById("product_" + p.id);
+    const qtyInput = document.getElementById("qty_" + p.id);
+    const label = card ? card.querySelector(".stock-label") : null;
+
+    if (left <= 0) {
+      // 已售罄：禁止输入，只提示“已售罄”，不说数量
+      if (qtyInput) {
+        qtyInput.value = "";
+        qtyInput.disabled = true;
+        qtyInput.placeholder = "已售罄";
+      }
+      if (card) {
+        card.classList.add("soldout");
+      }
+      if (label) {
+        label.textContent = "已售罄";
+      }
+    } else {
+      // 有货：只简单写“可下单”
+      if (label) {
+        label.textContent = "可下单";
+      }
+    }
+  });
+}
+
 // 从 pendingOrder 恢复下单页面的表单（收货信息 + 订单数量）
 function restoreOrderFormFromPending() {
   // 不是下单页就不用恢复
@@ -414,7 +476,7 @@ window.confirmOrder = async function () {
     const left = total - sold;
     alert(
       `抱歉，「${lackItem.name}」库存不足。\n` +
-      `总库存：${total} 本，已售：${sold} 本，剩余：${left} 本。\n` +
+      `剩余：${left} 件。\n` +
       `请修改数量后再下单～`
     );
     return;
@@ -748,10 +810,11 @@ window.loadOrders = async function () {
 const path = window.location.pathname;
 
 if (path.endsWith("order.html")) {
-  // 下单页：先画订单，再从 pendingOrder 恢复表单
   renderProductList();
   restoreOrderFormFromPending();
+  loadStockStatus();   // 🆕 再拉取库存状态标记“可下单/已售罄”
 }
+
 if (path.endsWith("confirm.html")) {
   window.loadPendingOrder();
 }
